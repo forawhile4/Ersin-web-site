@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+import Header from '~/components/widgets/Header.astro';
+import { headerData } from '~/navigation';
+import { findImage } from '~/utils/images';
+
+const yemekler = await getCollection('yemekler', ({ data }) => {
+  return !data.draft;
+});
+
+yemekler.sort((a, b) => new Date(b.data.publishDate).valueOf() - new Date(a.data.publishDate).valueOf());
+
+const yemeklerWithImages = await Promise.all(
+  yemekler.map(async (yemek) => {
+    const resolvedImage = await findImage(yemek.data.image);
+    return { ...yemek, resolvedImage };
+  })
+);
+
+const metadata = {
+  title: 'Yemekler - Ersin Aynur',
+  description: 'Ersin Aynur tarafından hazırlanan lezzetli ve pratik yemek tarifleri koleksiyonu.',
+  openGraph: {
+    images: [
+      {
+        url: '~/assets/images/kuzu incik.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+};
+---
+
+<Layout metadata={metadata}>
+  <Fragment slot="header">
+    <Header {...headerData} showRssFeed={false} />
+  </Fragment>
+
+  <section class="py-8 sm:py-12 lg:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">Yemek Tarifleri</h1>
+        <p class="mt-4 text-lg text-gray-600 dark:text-slate-400">Mutfağımdan çıkan lezzet sırları ve pratik tarifler.</p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {yemeklerWithImages.map((yemek) => (
+          <a href={`/yemekler/${yemek.slug}`} class="block group bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+            <div class="relative">
+              {yemek.data.image && (
+                <img 
+                  src={typeof yemek.resolvedImage === 'string' ? yemek.resolvedImage : yemek.resolvedImage?.src} 
+                  alt={yemek.data.title} 
+                  class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+              )}
+              <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-10 transition-all duration-300"></div>
+            </div>
+            <div class="p-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{yemek.data.title}</h2>
+              <p class="text-gray-600 dark:text-slate-400 text-sm">{yemek.data.porsiyon} | {yemek.data.zorluk}</p>
+              <div class="mt-4 text-primary-600 dark:text-primary-400 font-semibold group-hover:underline">
+                Tarifi Gör »
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

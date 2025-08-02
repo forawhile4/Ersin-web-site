@@ -1,0 +1,69 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
+import DidYouKnow from '~/components/widgets/DidYouKnow.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+import heroImage from '~/assets/yemek-1.jpg';
+
+const metadata = {
+  title: 'Ersin Aynur - Lezzetli Tarifler ve Mutfak Sırları',
+  ignoreTitleTemplate: true,
+};
+---
+
+<Layout metadata={metadata}>
+  <!-- Hero Widget -->
+  <Hero
+    actions={[
+      {
+        variant: 'primary',
+        text: 'Tarifleri Keşfet',
+        href: '/yemekler',
+        icon: 'tabler:book',
+      },
+      { 
+        text: 'Hakkımda',
+        href: '/hakkinda',
+      },
+    ]}
+    image={{ src: heroImage, alt: 'Lezzetli bir yemek' }}
+  >
+    <Fragment slot="title">
+      Ersin Aynur'un <span class="text-accent dark:text-white">Mutfak Günlüğü</span>
+    </Fragment>
+
+    <Fragment slot="subtitle">
+      <span class="italic">Mutfakta sadece tarifler değil, anılar da birikir.</span>
+    </Fragment>
+  </Hero>
+
+  <!-- BlogLatestPosts Widget -->
+  <BlogLatestPosts
+    title="En Son Tarifler"
+    information={`Mutfaktan yeni çıkanlar...`}
+  />
+
+  <!-- DidYouKnow Widget -->
+  <DidYouKnow />
+
+  <!-- CallToAction Widget -->
+  <CallToAction
+    actions={[
+      {
+        variant: 'primary',
+        text: 'Tüm Tarifleri Gör',
+        href: '/yemekler',
+        icon: 'tabler:book',
+      },
+    ]}
+  >
+    <Fragment slot="title">
+      Mutfakta harikalar yaratmaya hazır mısınız?
+    </Fragment>
+
+    <Fragment slot="subtitle">
+      Birbirinden lezzetli tariflerimi keşfedin ve kendi mutfağınızın şefi olun.
+    </Fragment>
+  </CallToAction>
+</Layout>

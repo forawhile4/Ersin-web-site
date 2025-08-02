@@ -1,0 +1,89 @@
+---
+import { getCollection, getEntryBySlug } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+import Header from '~/components/widgets/Header.astro';
+import { headerData } from '~/navigation';
+import { findImage } from '~/utils/images';
+
+export async function getStaticPaths() {
+  const yemekler = await getCollection('yemekler');
+  return yemekler.map((yemek) => ({
+    params: { slug: yemek.slug },
+    props: { yemek },
+  }));
+}
+
+interface Props {
+  yemek: CollectionEntry<'yemekler'>;
+}
+
+const { yemek } = Astro.props;
+const resolvedImage = await findImage(yemek.data.image);
+
+const metadata = {
+  title: `${yemek.data.title} - Yemek Tarifi`,
+  description: `Lezzetli ${yemek.data.title} tarifinin hazırlanışı, malzemeleri ve püf noktaları.`,
+  openGraph: {
+    images: [
+      {
+        url: resolvedImage,
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+};
+
+const { Content } = await yemek.render();
+
+---
+
+<Layout metadata={metadata}>
+  <Fragment slot="header">
+    <Header {...headerData} showRssFeed={false} />
+  </Fragment>
+
+  <section class="py-8 sm:py-12 lg:py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">{yemek.data.title}</h1>
+      </div>
+
+      {yemek.data.image && (
+        <div class="mb-8 rounded-lg overflow-hidden shadow-lg">
+          <img 
+            src={typeof resolvedImage === 'string' ? resolvedImage : resolvedImage?.src} 
+            alt={yemek.data.title} 
+            class="w-full h-auto max-h-[500px] object-cover"
+          />
+        </div>
+      )}
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <aside class="md:col-span-1 bg-gray-50 dark:bg-slate-800 p-6 rounded-lg self-start sticky top-24">
+          <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Özet Bilgiler</h2>
+          <ul class="space-y-3 text-gray-700 dark:text-slate-300">
+            <li><strong>Porsiyon:</strong> {yemek.data.porsiyon}</li>
+            <li><strong>Zorluk:</strong> {yemek.data.zorluk}</li>
+            <li><strong>Hazırlık:</strong> {yemek.data.hazirlik}</li>
+            <li><strong>Pişirme:</strong> {yemek.data.pisirme}</li>
+          </ul>
+        </aside>
+
+        <main class="md:col-span-2">
+          <div class="bg-white dark:bg-slate-800/50 p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Malzemeler</h2>
+            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-slate-300">
+              {yemek.data.malzemeler.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+
+          <div class="prose prose-lg dark:prose-invert max-w-none">
+            <Content />
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+</Layout>

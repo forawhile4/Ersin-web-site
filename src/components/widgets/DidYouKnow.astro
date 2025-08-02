@@ -1,0 +1,189 @@
+---
+// Bu bileşen için sunucu taraflı bir mantık gerekmiyor.
+---
+
+<div id="did-you-know" class="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12 bg-blue-50 dark:bg-slate-800 rounded-lg shadow-md border border-transparent dark:border-slate-700 transition-all duration-300 ease-in-out hover:shadow-lg hover:dark:border-slate-600 hover:-translate-y-1">
+  <h2 class="text-2xl font-bold text-center text-blue-800 dark:text-blue-300 mb-4">Biliyor muydunuz?</h2>
+  <div id="tip-container" class="text-center p-4 min-h-[120px] flex items-center justify-center">
+    <p id="tip-text" class="text-lg text-gray-700 dark:text-slate-300"></p>
+  </div>
+  <div class="text-center mt-4">
+    <button id="next-tip-btn" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300">
+      Yeni Bilgi
+    </button>
+  </div>
+</div>
+
+<script>
+  const tips = [
+    {
+      title: 'Baharatlar tazeliğini kaybedebilir',
+      text: 'Baharatlar bozulmaz ama zamanla renklerini ve kokularını kaybederek etkisiz hale gelir. Renkleri solmuş ve kokusu hafif olan baharatları yenilemek, yemeklerinin tadını geri getirir.',
+    },
+    {
+      title: 'Et pişirirken fırın + ocak ikilisi fark yaratır',
+      text: 'Eti önce ocakta kızartıp sonra fırında bitirirsen dışı çıtır, içi sulu bir sonuç elde edersin. Bu teknik restoran kalitesinde et pişirmenin püf noktasıdır.',
+    },
+    {
+      title: 'Oda sıcaklığındaki et daha iyi pişer',
+      text: 'Eti direkt buzdolabından çıkar çıkmaz pişirmek yerine oda sıcaklığına gelene kadar bekletmek, daha eşit pişmesini ve daha iyi bir kıvam elde etmeni sağlar.',
+    },
+    {
+      title: 'Hazırlık aşaması: Mise en Place',
+      text: 'Fransızca “her şey yerli yerinde” anlamına gelen mise en place, malzemeleri pişirmeden önce hazırlayıp sıraya koymaktır. Bu sayede mutfakta panik olmaz, yemek pişirmek keyfe dönüşür.',
+    },
+    {
+      title: 'Kusursuz tereyağlı tost için fırça kullan',
+      text: 'Soğuk tereyağını sürmeye çalışmak yerine, tereyağını eritip fırçayla sürerek her noktaya eşit dağılmasını sağlayabilirsin.',
+    },
+    {
+      title: 'Tabakları ısıt, yemeğin sıcak kalsın',
+      text: 'Yemeği servis etmeden önce tabakları düşük sıcaklıkta 10-15 dakika fırında ısıtmak, restoran şıklığında bir sunum sağlar ve yemeğin çabuk soğumasını önler.',
+    },
+    {
+      title: 'Sebze atıklarını çöpe atma, stok yap',
+      text: 'Soğan kabuğu, havuç ucu, kereviz sapı gibi sebze artıklarını kaynatıp süzerek lezzetli bir sebze suyu elde edebilirsin. Hem israf azalır, hem de yemeklere derinlik katar.',
+    },
+    {
+      title: 'Fırınladığın ürünleri yarı sürede çevir',
+      text: 'Kek, kurabiye ya da herhangi bir fırın yemeğini pişirirken yarı sürede tepsiyi çevirerek her tarafının eşit pişmesini sağlayabilirsin. Özellikle altı üstü farklı ısınan fırınlarda çok işe yarar.',
+    },
+    {
+      title: 'Yemek pişirme zamanını planla',
+      text: 'Birden fazla yemek yapacaksan, hangisinin ne kadar sürede piştiğini önceden düşünmek işleri kolaylaştırır. Bazı yemekler (örneğin sebze yemekleri) bekledikçe daha lezzetli olur.',
+    },
+    {
+      title: 'Yumurtayı Kolay Soymak İçin',
+      text: 'Kabuğunu rahatça soymak için yumurtaya küçük bir delik açarak haşlayabilirsiniz.',
+    },
+    {
+      title: 'Balığın Mangala Yapışmaması İçin',
+      text: 'Izgaranın üstüne limon dilimleri dizerek balığın yapışmasını önler ve lezzet katarsınız.',
+    },
+    {
+      title: 'Muzu Uzun Süre Saklama',
+      text: 'Muzun ucunu plastik poşetle sararak dalından ayırdıktan sonra daha uzun süre taze kalmasını sağlayabilirsiniz.',
+    },
+    {
+      title: 'Mikrodalgada Kurumayan Yiyecekler',
+      text: 'Mikrodalgada ısıtmak istediğiniz yiyeceklerin yanına yarım bardak su koyarsanız, yiyecek kuru olmaz.',
+    },
+    {
+      title: 'Unu Böceklerden Koruma',
+      text: 'Unun içine birkaç defne yaprağı koyarak böceklenmesini engelleyebilirsiniz.',
+    },
+    {
+      title: 'Yumurta Kabuğu Temizliği',
+      text: 'Parmağınızın ucunu suyla ıslatarak yemeğin içine düşmüş yumurta kabuklarını kolayca alabilirsiniz.',
+    },
+    {
+      title: 'Hafif Soslar Hazırlayın',
+      text: 'Kremalı soslar yerine az yağlı sütle sos yaparak hafif ve lezzetli soslar hazırlayabilirsiniz.',
+    },
+    {
+      title: 'Izgarada Taze Baharat Kullanımı',
+      text: 'Et ve tavuk ızgarasında taze yaprak baharatlar kullanın; kuru baharatlar yüksek ateşte yanabilir.',
+    },
+    {
+      title: 'Lezzetli Yemek Suları',
+      text: 'Kemik veya tavuk suyu kaynatıp yemeklere lezzet vermek için suyunu buz kalıplarında saklayabilirsiniz.',
+    },
+    {
+      title: 'Fırın Tepsisini Temiz Tutun',
+      text: 'Fırın tepsisi kirlenmesin diye yağlı kağıt kullanabilirsiniz.',
+    },
+    {
+      title: 'Hafif Patates Alternatifi',
+      text: 'Kızartma yerine fırında baharatlı patates yaparak daha hafif bir alternatif hazırlayabilirsiniz.',
+    },
+    {
+      title: 'Makarna Suyunu Değerlendirin',
+      text: 'Makarna pişirme suyundan biraz ayırıp sos yaparken kullanırsanız lezzet artar.',
+    },
+    {
+      title: 'Margarini Hızlı Eritme',
+      text: 'Margarini mikrodalgada büyük küpler halinde 30 saniyede eritebilirsiniz.',
+    },
+    {
+      title: 'Salçanın Küflenmesini Önleme',
+      text: 'Salçanın küflenmesini önlemek için her kullanımdan sonra üstüne biraz sıvı yağ gezdirin.',
+    },
+    {
+      title: 'Daha Yumuşak Tavuk Sote',
+      text: 'Tavuk sote yaparken doğranmış tavukları süt ve sıvı yağ içinde bekletirseniz daha yumuşak olur.',
+    },
+    {
+      title: 'Yaz İçin Pratik Soğuk Kahve',
+      text: 'Yazın soğuk içecek hazırlamak için buz kalıplarına nescafe koyup dondurabilir, kahve küplerini sütle tüketebilirsiniz.',
+    },
+    {
+      title: 'Tane Tane Pilav İçin',
+      text: 'Pirinci iyi yıkayıp nişastasını alın, böylece tane tane pilav olur.',
+    },
+    {
+      title: 'Pilavın Rengini Koruma',
+      text: 'Şehriyeli pilavda oluşan kahverengi rengi önlemek için pilav tenceresine birkaç damla limon sıkabilirsiniz.',
+    },
+    {
+      title: 'Hamuru Hızlı Mayalandırma',
+      text: 'Hamurun mayalanmasını hızlandırmak için fırını 40 dereceye ısıtıp kapatın, hamuru içinde bekletin.',
+    },
+    {
+      title: 'Lezzetli Börek Sırrı',
+      text: 'Böreğin sosunun yufkaya iyi işlemesi için dolapta en az 3 saat bekletin.',
+    },
+    {
+      title: 'Vanilya Aromasını Güçlendirme',
+      text: 'Vanilyayı tatlıya en son aşamada ekleyin, tadı daha keskin olur.',
+    },
+    {
+      title: 'Kekin Eşit Kabarması İçin',
+      text: 'Kek kalıbına dökerken spatula ile hamuru kenarlara dağıtın, kek eşit kabarır.',
+    },
+    {
+      title: 'Sebze Soslarının Sırrı',
+      text: 'Sebzeleri yıkadıktan sonra iyice kurutun, sos daha iyi tutar.',
+    },
+    {
+      title: 'Sebzeleri Uzun Süre Saklama',
+      text: 'Sebzeleri dolapta yıkamadan saklamak daha uzun ömürlü olur.',
+    },
+    {
+      title: 'Limondan Daha Fazla Su Çıkarma',
+      text: 'Limonu sıcak suda bekleterek suyunu daha yoğun çıkarabilirsiniz.',
+    },
+    {
+      title: 'Salata Sosu Zamanlaması',
+      text: 'Salataya yağı en son ekleyin, sos sebzelere daha iyi geçer.',
+    },
+    {
+      title: 'Çorbanın Kararmaması İçin',
+      text: 'Sebzeli çorbanın kararmaması için sirke kullanabilirsiniz.',
+    },
+    {
+      title: 'Çorbanın Kıvamını Ayarlama',
+      text: 'Çorbanız fazla suluysa, yağ ve un kavurup ekleyerek kıvamını artırabilirsiniz.',
+    }
+  ];
+
+  const tipTextElement = document.getElementById('tip-text');
+  const nextTipButton = document.getElementById('next-tip-btn');
+  let currentTipIndex = -1;
+
+  function showRandomTip() {
+    let newIndex = currentTipIndex;
+    // Ensure we don't show the same tip twice in a row
+    while (newIndex === currentTipIndex) {
+      newIndex = Math.floor(Math.random() * tips.length);
+    }
+    currentTipIndex = newIndex;
+    const tip = tips[currentTipIndex];
+    tipTextElement.innerHTML = `<strong class="block mb-2 text-blue-700 dark:text-blue-400">${tip.title}</strong>${tip.text}`;
+  }
+
+  // Show the first tip on page load
+  document.addEventListener('DOMContentLoaded', showRandomTip);
+
+  // Show a new tip on button click
+  nextTipButton.addEventListener('click', showRandomTip);
+</script>

@@ -1,0 +1,80 @@
+---
+import config from '~/config.yaml';
+import Layout from '~/layouts/PageLayout.astro';
+
+import Content from '~/components/widgets/Content.astro';
+import Hero from '~/components/widgets/Hero.astro';
+
+import ersinAynurImg from '~/assets/ersin-aynur.png';
+import yemekImg from '~/assets/yemek-1.jpg';
+import ss2Img from '~/assets/images/ss2.jpg';
+import ss3Img from '~/assets/images/ss3.jpg';
+
+const metadata = {
+  title: 'Hakkımda',
+  ...config.metadata,
+};
+---
+
+<Layout metadata={metadata}>
+  <!-- Hero Widget -->
+  <Hero>
+    <Fragment slot="title">Hakkımda</Fragment>
+    <Fragment slot="subtitle">
+      Merhaba, ben Ersin Aynur. Lezzet ve öğretme tutkusuyla dolu bir hayat...
+    </Fragment>
+  </Hero>
+
+  <!-- Content Widget: Eğitim ve Kariyer -->
+  <Content
+    isReversed
+    image={{
+      src: ersinAynurImg,
+      alt: 'Ersin Aynur portre fotoğrafı',
+    }}
+  >
+    <Fragment slot="content">
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Giriş ve Eğitim</h3>
+      <p class="text-muted dark:text-slate-400">
+        Merhaba, ben Ersin Aynur. Yaklaşık 30 yılı aşkın süredir hem eğitim hem de gıda sektörlerinde aktif olarak çalışıyorum. 1993 yılında Atatürk Üniversitesi Gıda Mühendisliği bölümünden mezun oldum. Ardından Türk Hava Kurumu Üniversitesi’nde İşletme alanında yüksek lisans (MBA) yaparak yönetim ve organizasyon becerilerimi geliştirdim.
+        <br /><br />
+        Meslek hayatıma 1995 yılında Saruhan Konservecilik firmasında Gıda Kalite Kontrol Mühendisi olarak başladım. Bu süreçte kalite yönetimi, analiz ve denetim konularında önemli deneyimler kazandım. 1997 yılından bu yana Milli Eğitim Bakanlığı bünyesinde öğretmen olarak görev yapıyor; sınıf yönetimi, öğrenci motivasyonu ve etkili iletişim gibi alanlarda çalışmalar yürütüyorum.
+      </p>
+    </Fragment>
+  </Content>
+
+  <!-- Content Widget: Yetkinlikler ve Tutkular -->
+  <Content
+    image={{
+      src: ss3Img,
+      alt: 'Mesleki deneyim ve çok yönlülük ile ilgili bir görsel',
+    }}
+  >
+    <Fragment slot="content">
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Mesleki Deneyim ve Çok Yönlülük</h3>
+      <p class="text-muted dark:text-slate-400">
+        Ayrıca bir Bilgisayar Formatörü, Eğitim Danışmanı, Satranç Antrenörü ve ProChef üyesi bir aşçıyım. Farklı disiplinleri bir araya getiren bu alanlar, hem mesleki hem de kişisel gelişimime büyük katkı sağlıyor. Özellikle yaratıcı mutfak çalışmaları, teknolojinin eğitimde etkin kullanımı ve insanlara dokunabilmek, en büyük motivasyon kaynaklarım arasında.
+        <br /><br />
+        Türkçenin yanı sıra Almanca’yı akıcı düzeyde konuşabiliyorum. Bu sayede uluslararası kaynaklara ulaşma ve farklı kültürlerle iletişim kurma imkânım oldu. Bugüne kadar hem eğitim hem de kişisel meraklarım doğrultusunda birçok şehir ve ülke gezdim.
+      </p>
+    </Fragment>
+  </Content>
+
+  <!-- Content Widget: Gezgin Ruhu ve Yaşam Felsefesi -->
+  <Content
+    isReversed
+    image={{
+      src: ss2Img,
+      alt: 'Ersin Aynurun yeni yemeği',
+    }}
+  >
+    <Fragment slot="content">
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Uluslararası Deneyim ve Yaşam Felsefesi</h3>
+      <p class="text-muted dark:text-slate-400">
+        Zaman içinde ziyaret ettiğim ve yaşadığım şehirlerden bazıları şunlardır: Türkiye'de Manisa, Eskişehir, Gaziantep, İskenderun, Kütahya, Kahramanmaraş, Ankara, Giresun, Amasya, Ardahan, Samsun, Ordu, Rize, Çorum, Trabzon, Afyonkarahisar, Uşak, Adana, İstanbul, Hopa (Artvin) ve Erzurum. Yurtdışında ise Strasbourg, Brüksel, Lüksemburg, Londra, Basel, Stockholm, Hamburg, Düsseldorf, Köln, Mannheim, Centro Habana (Küba), Piripá (Brezilya) ve Güzelyurt (Kıbrıs) gibi çok çeşitli kültürel deneyimler edindiğim şehirlerde bulundum.
+        <br /><br />
+        Şu anda Manisa’da yaşıyor, sahip olduğum bilgi ve deneyimi paylaşmaya, öğrenmeye ve öğretmeye tutkuyla devam ediyorum. Benim için dikkat ve konsantrasyon, özgür düşünceyle birleştiğinde ortaya çıkan potansiyelin sınırı yoktur. Bu inançla hem bireysel gelişimimi sürdürüyor hem de çevreme katkı sağlamaya çalışıyorum.
+      </p>
+    </Fragment>
+  </Content>
+</Layout>

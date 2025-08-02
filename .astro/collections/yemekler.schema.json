@@ -1,0 +1,64 @@
+{
+  "$ref": "#/definitions/yemekler",
+  "definitions": {
+    "yemekler": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "publishDate": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "integer",
+              "format": "unix-time"
+            }
+          ]
+        },
+        "porsiyon": {
+          "type": "string"
+        },
+        "zorluk": {
+          "type": "string"
+        },
+        "hazirlik": {
+          "type": "string"
+        },
+        "pisirme": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "malzemeler": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "publishDate",
+        "porsiyon",
+        "zorluk",
+        "hazirlik",
+        "pisirme",
+        "malzemeler"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
