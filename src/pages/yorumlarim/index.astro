@@ -1,0 +1,73 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import { supabase } from '~/utils/supabase';
+
+// Sunucu tarafında veritabanından tüm yorumları çekiyoruz.
+const { data: posts, error } = await supabase
+  .from('posts')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+if (error) {
+  console.error('Error fetching posts:', error.message);
+}
+
+const metadata = {
+  title: 'Yorumlarım - Tüm Yazılar',
+  description: 'Gezdiğim ve gördüğüm yerler hakkında ki yorumlarım',
+};
+---
+
+<Layout metadata={metadata}>
+  <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+    <div class="max-w-7xl mx-auto">
+      <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl text-gray-900 dark:text-white">
+          Yorumlarım
+        </h2>
+        <p class="mt-4 text-lg text-gray-600 dark:text-slate-400 italic">
+          Gezdiğim ve gördüğüm yerler hakkında ki yorumlarım
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+        {posts && posts.length > 0 && (
+          posts.map((post) => (
+            <a href={`/yorumlarim/${post.id}`} class="block bg-white dark:bg-slate-800 shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              {post.image_url && (
+                <div class="overflow-hidden">
+                  <img 
+                    src={post.image_url} 
+                    alt={post.title} 
+                    class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300 ease-in-out"
+                  />
+                </div>
+              )}
+              <div class="p-6">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-200">
+                  {post.title}
+                </h3>
+                {post.address && (
+                  <p class="mt-2 text-sm text-gray-500 dark:text-slate-400 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                    {post.address}
+                  </p>
+                )}
+              </div>
+            </a>
+          ))
+        )}
+      </div>
+
+      {posts && posts.length === 0 && (
+        <div class="text-center mt-12">
+            <p class="text-lg text-gray-600 dark:text-slate-400">Henüz hiç yazı eklenmemiş.</p>
+            <a href="/admin" class="mt-4 inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">İlk Yazıyı Ekle</a>
+        </div>
+      )}
+
+    </div>
+  </section>
+</Layout>

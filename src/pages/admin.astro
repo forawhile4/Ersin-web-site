@@ -1,0 +1,191 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import { supabase } from '~/utils/supabase.js';
+
+// Check user's authentication status
+const accessToken = Astro.cookies.get('sb-access-token')?.value;
+const { data: { user } } = await supabase.auth.getUser(accessToken);
+
+let allPosts = [];
+if (user) {
+    const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+    if (data) {
+        allPosts = data;
+    }
+    if (error) {
+        console.error('Error fetching posts:', error.message);
+    }
+}
+---
+
+<Layout metadata={{ title: 'Admin Panel' }}>
+  <div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-slate-900 py-12">
+    <div class="max-w-4xl w-full bg-white dark:bg-slate-800 shadow-lg rounded-lg p-8">
+      
+      {!user ? (
+        <!-- Login Form -->
+        <>
+          <h2 class="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">Yönetim Paneli Girişi</h2>
+          <form method="POST" action="/api/auth/signin" class="max-w-md mx-auto">
+            <div class="mb-4">
+              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-slate-300">E-posta</label>
+              <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-6">
+              <label for="password" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Şifre</label>
+              <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Giriş Yap
+            </button>
+            {Astro.url.searchParams.has('error') && (
+              <p class="text-red-500 text-sm mt-4 text-center">Geçersiz e-posta veya şifre.</p>
+            )}
+          </form>
+        </>
+      ) : (
+        <!-- Admin Panel -->
+        <>
+          <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Yönetim Paneli</h1>
+            <a href="/api/auth/signout" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+              Çıkış Yap
+            </a>
+          </div>
+
+          <!-- Add New Post Form -->
+          <div class="mb-12">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-slate-200">Yeni Yorum Ekle</h2>
+            <form id="add-post-form" class="space-y-4">
+              <div>
+                <label for="title" class="block text-sm font-medium text-gray-300">Başlık</label>
+                <input type="text" id="title" name="title" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+              </div>
+              <div>
+                <label for="location" class="block text-sm font-medium text-gray-300">Konum</label>
+                <input type="text" id="location" name="location" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+              </div>
+              <div>
+                <label for="content" class="block text-sm font-medium text-gray-300">Yorum İçeriği</label>
+                <textarea id="content" name="content" rows="4" required class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2"></textarea>
+              </div>
+              <div>
+                <label for="image" class="block text-sm font-medium text-gray-300">Resim</label>
+                <input type="file" id="image" name="image" accept="image/*" required class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+              </div>
+              <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Gönderi Ekle
+              </button>
+            </form>
+            <div id="form-message" class="mt-4"></div>
+          </div>
+
+          <!-- Existing Posts List -->
+          <div>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-slate-200">Mevcut Yorumlar</h2>
+            <div class="overflow-x-auto">
+              {allPosts.length > 0 ? (
+                <ul class="space-y-4">
+                  {allPosts.map(post => (
+                    <li id={`post-row-${post.id}`} class="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-4 rounded-lg shadow-sm transition-all">
+                      <div class="flex-grow">
+                        <p class="font-semibold text-gray-900 dark:text-white">{post.title}</p>
+                        <p class="text-sm text-gray-500 dark:text-slate-400">{new Date(post.created_at).toLocaleDateString('tr-TR')}</p>
+                      </div>
+                      <button data-post-id={post.id} class="delete-button ml-4 px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors">
+                        Sil
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="text-center text-gray-500 dark:text-slate-400">Henüz hiç yorum eklenmemiş.</p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Delete Post Logic ---
+      const deleteButtons = document.querySelectorAll('.delete-button');
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', async (event) => {
+          const postId = event.currentTarget.dataset.postId;
+          if (!postId) return;
+
+          const confirmed = confirm('Bu yorumu kalıcı olarak silmek istediğinizden emin misiniz?');
+          if (!confirmed) return;
+
+          try {
+            const response = await fetch('/api/posts/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: postId }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+              throw new Error(result.error || 'Bir hata oluştu.');
+            } else {
+              const rowToRemove = document.getElementById(`post-row-${postId}`);
+              if (rowToRemove) {
+                rowToRemove.style.transition = 'opacity 0.5s';
+                rowToRemove.style.opacity = '0';
+                setTimeout(() => rowToRemove.remove(), 500);
+              }
+            }
+          } catch (error) {
+            alert('Yorum silinirken bir hata oluştu: ' + error.message);
+          }
+        });
+      });
+
+      // --- Add Post Logic ---
+      const addPostForm = document.getElementById('add-post-form');
+      const formMessage = document.getElementById('form-message');
+
+      if (addPostForm) {
+        addPostForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          formMessage.textContent = '';
+          formMessage.className = 'mt-4';
+
+          const formData = new FormData(addPostForm);
+          
+
+          try {
+            const response = await fetch('/api/posts/create', {
+              method: 'POST',
+              headers: {},
+
+              body: formData,
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+              throw new Error(result.error || 'Yorum eklenirken bir hata oluştu.');
+            }
+
+            formMessage.textContent = 'Yorum başarıyla eklendi! Sayfa yenileniyor...';
+            formMessage.classList.add('text-green-500');
+            addPostForm.reset();
+            
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+
+          } catch (error) {
+            formMessage.textContent = 'Hata: ' + error.message;
+            formMessage.classList.add('text-red-500');
+          }
+        });
+      }
+    });
+  </script>
+</Layout>

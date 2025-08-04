@@ -4,6 +4,10 @@ import typographyPlugin from '@tailwindcss/typography';
 
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,json,md,mdx,svelte,ts,tsx,vue}'],
+  safelist: [
+    'theme-dark-blue',
+    'theme-light-blue',
+  ],
   theme: {
     extend: {
       colors: {
@@ -12,6 +16,7 @@ export default {
         accent: 'var(--aw-color-accent)',
         default: 'var(--aw-color-text-default)',
         muted: 'var(--aw-color-text-muted)',
+        'bg-default': 'var(--aw-color-bg-default)',
       },
       fontFamily: {
         sans: ['var(--aw-font-sans, ui-sans-serif)', ...defaultTheme.fontFamily.sans],

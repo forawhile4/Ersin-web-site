@@ -1,33 +1,30 @@
 ---
-import { UI } from 'astrowind:config';
+// This script is injected into the <head> of the page to apply the theme before the page is rendered.
+// This prevents the flash of unstyled content (FOUC) and ensures theme persistence.
+const script = `
+const themes = ['dark', 'theme-dark-blue', 'theme-light-blue', 'light'];
+const darkThemeNames = ['dark', 'theme-dark-blue'];
 
-// TODO: This code is temporary
+const theme = (() => {
+  if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+    return localStorage.getItem('theme');
+  }
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  return 'dark';
+})();
+
+if (theme && theme !== 'light' && theme !== 'dark') {
+  document.documentElement.classList.add(theme);
+}
+
+if (theme && darkThemeNames.includes(theme)) {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
+`;
 ---
 
-<script is:inline define:vars={{ defaultTheme: UI.theme || 'system' }}>
-  function applyTheme(theme) {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    const matches = document.querySelectorAll('[data-aw-toggle-color-scheme] > input');
-
-    if (matches && matches.length) {
-      matches.forEach((elem) => {
-        elem.checked = theme !== 'dark';
-      });
-    }
-  }
-
-  if ((defaultTheme && defaultTheme.endsWith(':only')) || (!localStorage.theme && defaultTheme !== 'system')) {
-    applyTheme(defaultTheme.replace(':only', ''));
-  } else if (
-    localStorage.theme === 'dark' ||
-    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  ) {
-    applyTheme('dark');
-  } else {
-    applyTheme('light');
-  }
-</script>
+<script is:inline set:html={script} />

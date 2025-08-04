@@ -2,6 +2,7 @@ import { getPermalink, getBlogPermalink, getAsset } from './utils/permalinks';
 import { SITE } from 'astrowind:config';
 
 export const headerData = {
+  showToggleTheme: true,
   links: [
     {
       text: 'Ana Sayfa',
@@ -13,7 +14,11 @@ export const headerData = {
     },
     {
       text: 'Yemekler',
-      href: getBlogPermalink(),
+      href: getPermalink('/yemekler'),
+    },
+    {
+      text: 'Yorumlarım',
+      href: getPermalink('/yorumlarim'),
     },
   ],
   actions: [],
@@ -26,7 +31,8 @@ export const footerData = {
       links: [
         { text: 'Ana Sayfa', href: getPermalink('/') },
         { text: 'Hakkında', href: getPermalink('/hakkinda') },
-        { text: 'Yemekler', href: getBlogPermalink() },
+        { text: 'Yemekler', href: getPermalink('/yemekler') },
+        { text: 'Yorumlarım', href: getPermalink('/yorumlarim') },
       ],
     },
   ],

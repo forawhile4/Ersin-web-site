@@ -1,0 +1,182 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import { supabase } from '~/utils/supabase';
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get('sb-access-token')?.value;
+const refreshToken = cookies.get('sb-refresh-token')?.value;
+
+if (!accessToken || !refreshToken) {
+  return redirect('/admin');
+}
+
+const { data: { user, session }, error } = await supabase.auth.setSession({
+  refresh_token: refreshToken,
+  access_token: accessToken,
+});
+
+if (error || !user) {
+  cookies.delete('sb-access-token', { path: '/' });
+  cookies.delete('sb-refresh-token', { path: '/' });
+  return redirect('/admin');
+}
+
+const accessTokenForClient = session?.access_token || accessToken;
+const refreshTokenForClient = session?.refresh_token || refreshToken;
+---
+
+<Layout metadata={{ title: 'Admin Panel' }}>
+  <div class="min-h-screen bg-gray-100 dark:bg-slate-900">
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Yönetim Paneli</h1>
+        <form method="POST" action="/api/auth/signout">
+  <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Çıkış Yap</button>
+</form>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 shadow-lg rounded-lg p-8">
+        <h2 class="text-2xl font-bold mb-6">Yeni Yazı Ekle</h2>
+                <form id="reviewForm" class="space-y-6 bg-white p-8 rounded-lg shadow-md" data-access-token={accessTokenForClient} data-refresh-token={refreshTokenForClient}>
+          <div class="mb-4">
+            <label for="title" class="block text-sm font-medium mb-1">Başlık</label>
+            <input type="text" id="title" name="title" required class="w-full px-3 py-2 border rounded-md bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div class="mb-4">
+            <label for="address" class="block text-sm font-medium mb-1">Adres (İsteğe Bağlı)</label>
+            <input type="text" id="address" name="address" class="w-full px-3 py-2 border rounded-md bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="mb-4">
+            <label for="content" class="block text-sm font-medium mb-1">Anlatım</label>
+            <textarea id="content" name="content" rows="6" required class="w-full px-3 py-2 border rounded-md bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <div class="mb-6">
+            <label for="image" class="block text-sm font-medium mb-1">Görsel</label>
+            <input type="file" id="image" name="image" accept="image/*" required class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+          </div>
+          <button type="submit" id="submit-review-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Yazıyı Kaydet</button>
+          <p id="form-message" class="text-sm mt-4 text-center"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+        import { supabase } from '../../utils/supabase.ts';
+
+    function setupEventListeners() {
+        const logoutButton = document.getElementById('logout-button');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', async () => {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    console.error('Error signing out:', error);
+                } else {
+                    window.location.href = '/admin/login';
+                }
+            });
+        }
+
+        const reviewForm = document.getElementById('reviewForm');
+        const formMessage = document.getElementById('form-message');
+        const submitButton = document.getElementById('submit-review-button');
+
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                formMessage.textContent = 'Kaydediliyor, lütfen bekleyin...';
+                                submitButton.setAttribute('disabled', 'true');
+
+                                                const accessToken = reviewForm.dataset.accessToken;
+                const refreshToken = reviewForm.dataset.refreshToken;
+
+                if (!accessToken || !refreshToken) {
+                    throw new Error('Authentication tokens not found. Please log in again.');
+                }
+
+                const { error: sessionError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                });
+
+                if (sessionError) {
+                    throw new Error(`Failed to set session: ${sessionError.message}`);
+                }
+
+
+
+                const formData = new FormData(reviewForm);
+                const title = formData.get('title');
+                const address = formData.get('address');
+                const content = formData.get('content');
+                const imageFile = formData.get('image');
+
+                if (!imageFile || imageFile.size === 0) {
+                    formMessage.textContent = 'Lütfen bir resim dosyası seçin.';
+                    formMessage.className = 'text-red-500 text-sm mt-4 text-center';
+                    submitButton.removeAttribute('disabled');
+                    return;
+                }
+
+                try {
+                    const fileExt = imageFile.name.split('.').pop();
+                    const fileName = `${Date.now()}.${fileExt}`;
+                    const filePath = fileName;
+
+                    let { error: uploadError } = await supabase.storage
+                        .from('images')
+                        .upload(filePath, imageFile);
+
+                    if (uploadError) {
+                        // Hata depolama ile ilgiliyse, işlemi burada durdur ve hatayı fırlat.
+                        console.error('Storage Error:', uploadError.message);
+                        throw new Error(`Resim yüklenemedi: ${uploadError.message}`);
+                    }
+
+                    const { data: { publicUrl } } = supabase
+                        .storage
+                        .from('images')
+                        .getPublicUrl(filePath);
+
+                    // 4. Get current user
+                                                            const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) throw new Error('User not found. Please log in again.');
+
+                    // 5. Insert the post into the database with the user's ID
+                    const { data, error: dbError } = await supabase
+                        .from('posts')
+                        .insert([
+                            {
+                                title: title,
+                                content: content,
+                                address: address,
+                                imageUrl: publicUrl,
+                                user_id: user.id // Associate post with the logged-in user
+                            }
+                        ])
+                        .select();
+
+                    if (dbError) {
+                        throw dbError;
+                    }
+
+                    formMessage.textContent = 'Yorum başarıyla eklendi!';
+                    formMessage.className = 'text-green-500 text-sm mt-4 text-center';
+                    reviewForm.reset();
+
+                } catch (error) {
+                    console.error('Error submitting review:', error.message);
+                    formMessage.textContent = `Bir hata oluştu: ${error.message}`;
+                    formMessage.className = 'text-red-500 text-sm mt-4 text-center';
+                } finally {
+                    submitButton.removeAttribute('disabled');
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', setupEventListeners);
+</script>

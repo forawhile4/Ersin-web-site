@@ -1,8 +1,6 @@
 ---
 import { Icon } from 'astro-icon/components';
 
-import { UI } from 'astrowind:config';
-
 export interface Props {
   label?: string;
   class?: string;
@@ -11,7 +9,7 @@ export interface Props {
 }
 
 const {
-  label = 'Toggle between Dark and Light mode',
+  label = 'Temayı Değiştir',
   class:
     className = 'text-muted dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center',
   iconClass = 'w-6 h-6',
@@ -19,10 +17,58 @@ const {
 } = Astro.props;
 ---
 
-{
-  !(UI.theme && UI.theme.endsWith(':only')) && (
-    <button type="button" class={className} aria-label={label} data-aw-toggle-color-scheme>
-      <Icon name={iconName} class={iconClass} />
-    </button>
-  )
-}
+<button id="theme-toggle-btn" type="button" class={className} aria-label={label}>
+  <Icon name={iconName} class={iconClass} />
+</button>
+
+<script is:inline>
+
+  const themeToggleButton = document.getElementById('theme-toggle-btn');
+
+  const applyTheme = (theme) => {
+    // 1. Remove all old theme classes
+    themes.forEach((t) => {
+      document.documentElement.classList.remove(t);
+    });
+
+    // 2. Add the new theme class (if it's not a base theme like 'light')
+    if (theme !== 'light' && theme !== 'dark') {
+      document.documentElement.classList.add(theme);
+    }
+
+    // 3. Add or remove .dark class for text color, based on the theme
+    if (darkThemeNames.includes(theme)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // 4. Save the preference
+    localStorage.setItem('theme', theme);
+  };
+
+  const getNextTheme = (currentTheme) => {
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    return themes[nextIndex];
+  };
+
+
+
+  const initThemeToggle = () => {
+    const themeToggleButton = document.getElementById('theme-toggle-btn');
+    if (themeToggleButton) {
+      themeToggleButton.addEventListener('click', () => {
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        const nextTheme = getNextTheme(currentTheme);
+        applyTheme(nextTheme);
+      });
+    }
+  };
+
+  // Run the script on initial page load
+  initThemeToggle();
+
+  // Run the script again after every page transition
+  document.addEventListener('astro:page-load', initThemeToggle);
+</script>

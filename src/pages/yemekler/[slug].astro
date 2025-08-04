@@ -1,24 +1,24 @@
 ---
-import { getCollection, getEntryBySlug } from 'astro:content';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '~/layouts/PageLayout.astro';
 import Header from '~/components/widgets/Header.astro';
 import { headerData } from '~/navigation';
 import { findImage } from '~/utils/images';
 
+
+import { getCollection, getEntryBySlug } from 'astro:content';
+
 export async function getStaticPaths() {
   const yemekler = await getCollection('yemekler');
-  return yemekler.map((yemek) => ({
-    params: { slug: yemek.slug },
-    props: { yemek },
-  }));
+  return yemekler.map((yemek) => ({ params: { slug: yemek.slug } }));
 }
 
-interface Props {
-  yemek: CollectionEntry<'yemekler'>;
-}
+const { slug } = Astro.params;
+const yemek = await getEntryBySlug('yemekler', slug!);
 
-const { yemek } = Astro.props;
+if (!yemek) {
+  return Astro.redirect('/404');
+}
 const resolvedImage = await findImage(yemek.data.image);
 
 const metadata = {
@@ -86,4 +86,8 @@ const { Content } = await yemek.render();
       </div>
     </div>
   </section>
+
+  <!-- Yorumlar Bölümü -->
+  
+
 </Layout>

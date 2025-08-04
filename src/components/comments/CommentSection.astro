@@ -1,0 +1,133 @@
+---
+
+
+export interface Props {
+  postSlug: string;
+}
+
+const { postSlug } = Astro.props;
+---
+
+<section id="comment-section" class="py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <h2 class="text-2xl font-bold mb-6">Yorumlar</h2>
+
+    <!-- New Comment Form -->
+    <form id="comment-form" class="mb-8">
+      <div class="mb-4">
+        <label for="author_name" class="block text-sm font-medium mb-1">Adınız</label>
+        <input type="text" id="author_name" name="author_name" required class="w-full px-3 py-2 border rounded-md bg-gray-100 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div class="mb-4">
+        <label for="content" class="block text-sm font-medium mb-1">Yorumunuz</label>
+        <textarea id="content" name="content" rows="4" required class="w-full px-3 py-2 border rounded-md bg-gray-100 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Yorumu Gönder</button>
+    </form>
+
+    <!-- Comment List -->
+    <div id="comment-list" class="space-y-6">
+      <!-- Comments will be dynamically inserted here -->
+      <p>Yorumlar yükleniyor...</p>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ postSlug }}>
+  import { supabase } from '../../utils/supabase';
+  import { format } from 'date-fns';
+
+  const commentList = document.getElementById('comment-list');
+  const commentForm = document.getElementById('comment-form');
+
+  function attachLikeButtonListeners() {
+    document.querySelectorAll('.like-button').forEach(button => {
+      // Prevent adding multiple listeners to the same button
+      if (button.dataset.listenerAttached) return;
+      button.dataset.listenerAttached = 'true';
+
+      button.addEventListener('click', async () => {
+        const commentId = button.getAttribute('data-comment-id');
+        const likeCountSpan = button.querySelector('.like-count');
+
+        if (!commentId || !likeCountSpan) return;
+
+        (button as HTMLButtonElement).disabled = true;
+
+        try {
+          const { error } = await supabase.rpc('increment_likes', { comment_id_to_inc: commentId });
+          if (error) throw error;
+
+          const currentLikes = parseInt(likeCountSpan.textContent || '0');
+          likeCountSpan.textContent = (currentLikes + 1).toString();
+          button.classList.add('text-red-500');
+        } catch (error) {
+          console.error('Error liking comment:', error);
+          (button as HTMLButtonElement).disabled = false;
+        }
+      });
+    });
+  }
+
+  async function fetchComments() {
+    if (!commentList) return;
+
+    const { data: comments, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('post_slug', postSlug)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching comments:', error);
+      commentList.innerHTML = '<p class="text-red-500">Yorumlar yüklenirken bir hata oluştu.</p>';
+      return;
+    }
+
+    if (comments.length === 0) {
+      commentList.innerHTML = '<p>Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>';
+      return;
+    }
+
+    commentList.innerHTML = comments.map(comment => `
+      <div class="p-4 rounded-lg bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+        <div class="flex justify-between items-center mb-2">
+          <p class="font-bold text-lg">${comment.author_name}</p>
+          <span class="text-xs text-gray-500">${format(new Date(comment.created_at), 'dd MMMM yyyy')}</span>
+        </div>
+        <p class="text-gray-700 dark:text-gray-300 mb-3">${comment.content}</p>
+        <button data-comment-id="${comment.id}" class="like-button flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-heart w-5 h-5" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" /></svg>
+          <span class="like-count font-medium">${comment.likes_count}</span>
+        </button>
+      </div>
+    `).join('');
+
+    attachLikeButtonListeners();
+  }
+
+  async function handleFormSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const author_name = formData.get('author_name');
+    const content = formData.get('content');
+
+    const { error } = await supabase
+      .from('comments')
+      .insert([{ post_slug: postSlug, author_name, content }]);
+
+    if (error) {
+      console.error('Error submitting comment:', error);
+      alert('Yorumunuz gönderilirken bir hata oluştu.');
+    } else {
+      form.reset();
+      fetchComments();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchComments();
+    commentForm?.addEventListener('submit', handleFormSubmit);
+  });
+</script>

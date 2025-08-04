@@ -1,4 +1,30 @@
 @tailwind base;
+
+:root {
+  --aw-color-primary: rgb(59 130 246);
+  --aw-color-secondary: rgb(107 114 128);
+  --aw-color-accent: rgb(234 179 8);
+  --aw-color-text-default: rgb(17 24 39);
+  --aw-color-text-muted: rgb(107 114 128);
+  --aw-color-bg-default: rgb(255 255 255);
+}
+
+.dark {
+  --aw-color-primary: rgb(59 130 246);
+  --aw-color-secondary: rgb(156 163 175);
+  --aw-color-accent: rgb(234 179 8);
+  --aw-color-text-default: rgb(229 231 235);
+  --aw-color-text-muted: rgb(156 163 175);
+  --aw-color-bg-default: rgb(17 24 39);
+}
+
+.theme-dark-blue {
+  --aw-color-bg-default: rgb(20 31 51); /* Custom Dark Blue */
+}
+
+.theme-light-blue {
+  --aw-color-bg-default: rgb(224 242 254); /* blue-50 */
+}
 @tailwind components;
 @tailwind utilities;
 

@@ -8,7 +8,7 @@ import Hero from '~/components/widgets/Hero.astro';
 import ersinAynurImg from '~/assets/ersin-aynur.png';
 import yemekImg from '~/assets/yemek-1.jpg';
 import ss2Img from '~/assets/images/ss2.jpg';
-import ss3Img from '~/assets/images/ss3.jpg';
+import maviTonImg from '~/assets/images/mavi-ton.jpg';
 
 const metadata = {
   title: 'Hakkımda',
@@ -21,7 +21,7 @@ const metadata = {
   <Hero>
     <Fragment slot="title">Hakkımda</Fragment>
     <Fragment slot="subtitle">
-      Merhaba, ben Ersin Aynur. Lezzet ve öğretme tutkusuyla dolu bir hayat...
+      <span class="italic">Merhaba, ben Ersin Aynur. Lezzet ve öğretme tutkusuyla dolu bir hayat...</span>
     </Fragment>
   </Hero>
 
@@ -46,7 +46,7 @@ const metadata = {
   <!-- Content Widget: Yetkinlikler ve Tutkular -->
   <Content
     image={{
-      src: ss3Img,
+      src: maviTonImg,
       alt: 'Mesleki deneyim ve çok yönlülük ile ilgili bir görsel',
     }}
   >
