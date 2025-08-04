@@ -24,7 +24,7 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
 
 export default defineConfig({
   server: {
-    host: true,
+    host: '0.0.0.0',
   },
   output: 'server',
   adapter: node({
